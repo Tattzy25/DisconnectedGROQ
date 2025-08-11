@@ -1,74 +1,169 @@
 interface ModelConfig {
     name: string;
     temperature: number;
-    type: "text" | "vision";
+    type: "text" | "vision" | "audio" | "compound";
     maxTokens?: number;
+    category?: "compound" | "llama4" | "llama3" | "openai" | "moonshot" | "audio" | "guard";
+    tools?: {
+        codeExecution?: boolean;
+        browserSearch?: boolean;
+        webSearch?: boolean;
+        parallelToolUse?: boolean;
+        jsonMode?: boolean;
+    };
+    description?: string;
+    latency?: "standard" | "low";
+    toolCallsPerRequest?: number;
+    tokenSpeed?: number;
 }
 
 const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
+    // Compound Models - Built-in Tools
+    "compound-beta": {
+        name: "compound-beta",
+        temperature: 0.1,
+        type: "compound",
+        maxTokens: 8192,
+        category: "compound",
+        tools: {
+            codeExecution: true,
+            webSearch: true,
+            parallelToolUse: true,
+            jsonMode: true
+        },
+        description: "Complex multi-step tasks with up to 10 tool calls",
+        latency: "standard",
+        toolCallsPerRequest: 10,
+        tokenSpeed: 350
+    },
+    "compound-beta-mini": {
+        name: "compound-beta-mini",
+        temperature: 0.1,
+        type: "compound",
+        maxTokens: 8192,
+        category: "compound",
+        tools: {
+            codeExecution: true,
+            webSearch: true,
+            parallelToolUse: true,
+            jsonMode: true
+        },
+        description: "Quick single-step queries with 3x lower latency",
+        latency: "low",
+        toolCallsPerRequest: 1,
+        tokenSpeed: 350
+    },
+    
+    // OpenAI Models - Built-in Tools
+    "openai/gpt-oss-120b": {
+        name: "openai/gpt-oss-120b",
+        temperature: 0.1,
+        type: "text",
+        maxTokens: 8192,
+        category: "openai",
+        tools: {
+            codeExecution: true,
+            browserSearch: true,
+            parallelToolUse: false,
+            jsonMode: true
+        },
+        description: "Large OpenAI model with code execution and browser search"
+    },
+    "openai/gpt-oss-20b": {
+        name: "openai/gpt-oss-20b",
+        temperature: 0.1,
+        type: "text",
+        maxTokens: 8192,
+        category: "openai",
+        tools: {
+            codeExecution: true,
+            browserSearch: true,
+            parallelToolUse: false,
+            jsonMode: true
+        },
+        description: "Smaller OpenAI model with code execution and browser search"
+    },
+    
+    // Llama 4 Models - Vision Capable
     "meta-llama/llama-4-maverick-17b-128e-instruct": {
         name: "meta-llama/llama-4-maverick-17b-128e-instruct",
         temperature: 0.1,
         type: "vision",
-        maxTokens: 8192
+        maxTokens: 8192,
+        category: "llama4",
+        tools: {
+            parallelToolUse: true,
+            jsonMode: true
+        },
+        description: "Llama 4 Maverick with extended context and vision capabilities"
     },
     "meta-llama/llama-4-scout-17b-16e-instruct": {
         name: "meta-llama/llama-4-scout-17b-16e-instruct",
         temperature: 0.1,
         type: "vision",
-        maxTokens: 8192
+        maxTokens: 8192,
+        category: "llama4",
+        tools: {
+            parallelToolUse: true,
+            jsonMode: true
+        },
+        description: "Llama 4 Scout with vision capabilities and tool use"
     },
-    "qwen/qwen3-32b": {
-        name: "qwen/qwen3-32b",
+    
+    // Vision Model (keeping as requested)
+    "meta-llama/llama-3.2-90b-vision-preview": {
+        name: "meta-llama/llama-3.2-90b-vision-preview",
         temperature: 0.1,
-        type: "text",
-        maxTokens: 32768
+        type: "vision",
+        maxTokens: 8192,
+        category: "llama3",
+        tools: {
+            parallelToolUse: true,
+            jsonMode: true
+        },
+        description: "Llama 3.2 90B with vision capabilities"
     },
+    
+    // Moonshot AI Model
     "moonshotai/kimi-k2-instruct": {
         name: "moonshotai/kimi-k2-instruct",
         temperature: 0.6,
         type: "text",
-        maxTokens: 131072
+        maxTokens: 131072,
+        category: "moonshot",
+        tools: {
+            parallelToolUse: true,
+            jsonMode: true
+        },
+        description: "Moonshot Kimi K2 with large context window and parallel tool use"
     },
-    "qwen-2.5-coder-32b": {
-        name: "qwen-2.5-coder-32b",
+    
+    // Audio Models
+    "playai-tts": {
+        name: "playai-tts",
+        temperature: 0.1,
+        type: "audio",
+        maxTokens: 4096,
+        category: "audio",
+        description: "Text-to-speech model for audio generation"
+    },
+    "whisper-large-v3": {
+        name: "whisper-large-v3",
+        temperature: 0.1,
+        type: "audio",
+        maxTokens: 4096,
+        category: "audio",
+        description: "Speech-to-text model for audio transcription"
+    },
+    
+    // Guard Model (keep existing)
+    "llama-guard-3-8b": {
+        name: "llama-guard-3-8b",
         temperature: 0.1,
         type: "text",
-        maxTokens: 32768
-    },
-    "qwen-qwq-32b": {
-        name: "qwen-qwq-32b",
-        temperature: 0.6,
-        type: "text",
-        maxTokens: 32768
-    },
-    "deepseek-r1-distill-llama-70b": {
-        name: "deepseek-r1-distill-llama-70b",
-        temperature: 0.6,
-        type: "text",
-        maxTokens: 16384
-    },
-    "qwen-2.5-32b": {
-        name: "qwen-2.5-32b",
-        temperature: 0.1,
-        type: "text",
-        maxTokens: 32768
-    },
-    "llama-3.3-70b-versatile": {
-        name: "llama-3.3-70b-versatile",
-        temperature: 0.1,
-        type: "text",
-        maxTokens: 32768
-    },
-    "llama-3.2-90b-vision-preview": {
-        name: "llama-3.2-90b-vision-preview",
-        temperature: 0.1,
-        type: "vision"
-    },
-    "llama-3.2-11b-vision-preview": {
-        name: "llama-3.2-11b-vision-preview",
-        temperature: 0.1,
-        type: "vision"
+        maxTokens: 8192,
+        category: "guard",
+        description: "Content moderation and safety model"
     }
 };
 
@@ -76,9 +171,21 @@ const MODEL_CONFIGS: { [key: string]: ModelConfig } = {
 const DEFAULT_TEMPERATURE = 0.1;
 const DEFAULT_MAX_TOKENS = 8192;
 
-// Export only text-based models for MODEL_OPTIONS
+// Export models for dropdown (exclude audio models for now)
 export const MODEL_OPTIONS = Object.entries(MODEL_CONFIGS)
+    .filter(([key, config]) => config.type !== "audio")
     .map(([key, _]) => key);
+
+// Export models by category for UI organization
+export const MODELS_BY_CATEGORY = {
+    compound: Object.keys(MODEL_CONFIGS).filter(key => MODEL_CONFIGS[key].category === "compound"),
+    llama4: Object.keys(MODEL_CONFIGS).filter(key => MODEL_CONFIGS[key].category === "llama4"),
+    llama3: Object.keys(MODEL_CONFIGS).filter(key => MODEL_CONFIGS[key].category === "llama3"),
+    openai: Object.keys(MODEL_CONFIGS).filter(key => MODEL_CONFIGS[key].category === "openai"),
+    moonshot: Object.keys(MODEL_CONFIGS).filter(key => MODEL_CONFIGS[key].category === "moonshot"),
+    audio: Object.keys(MODEL_CONFIGS).filter(key => MODEL_CONFIGS[key].category === "audio"),
+    guard: Object.keys(MODEL_CONFIGS).filter(key => MODEL_CONFIGS[key].category === "guard")
+};
 
 export function getModelTemperature(modelName: string): number {
     return MODEL_CONFIGS[modelName]?.temperature ?? DEFAULT_TEMPERATURE;
